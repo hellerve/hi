@@ -78,7 +78,7 @@ func makeWsHandler() func(http.ResponseWriter, *http.Request) {
 
 		room.Clients[usr] = ws
 
-		ws.WriteJSON(Message{From: "#channel",
+		room.Send(Message{From: "#channel",
 			Message: strings.Join([]string{"Welcome to ", roomname, ", ", usr, "!"}, "")})
 
 		for {
