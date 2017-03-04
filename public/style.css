@@ -65,11 +65,21 @@ body {
   padding-left: 1em;
   height: calc(100% - 100px);
   border-bottom: 2px solid black;
+  overflow: scroll;
 }
 
 #messages .user {
   color: darkblue;
   margin-right: 1em;
+}
+
+#messages p {
+  margin: 0;
+  padding: 0.5em;
+}
+
+#messages p:hover {
+  background-color: #eee;
 }
 
 #bottom {

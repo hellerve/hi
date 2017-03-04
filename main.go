@@ -12,6 +12,7 @@ import (
 )
 
 type Chatroom struct {
+	Name    string
 	Clients map[string]*websocket.Conn
 }
 
@@ -31,6 +32,8 @@ func (self *Chatroom) Send(msg Message) {
 			log.Printf("error: %v", err)
 			ws.Close()
 			delete(self.Clients, client)
+			self.Send(Message{From: "#channel",
+				Message: strings.Join([]string{client, " left the channel ", self.Name, "."}, "")})
 		}
 	}
 }
@@ -62,7 +65,7 @@ func makeWsHandler() func(http.ResponseWriter, *http.Request) {
 		room, ok := rooms[roomname]
 
 		if !ok {
-			rooms[roomname] = Chatroom{Clients: make(map[string]*websocket.Conn)}
+			rooms[roomname] = Chatroom{Clients: make(map[string]*websocket.Conn), Name: roomname}
 			room = rooms[roomname]
 		}
 
@@ -89,6 +92,8 @@ func makeWsHandler() func(http.ResponseWriter, *http.Request) {
 			if err != nil {
 				log.Printf("error %v", err)
 				delete(room.Clients, usr)
+				room.Send(Message{From: "#channel",
+					Message: strings.Join([]string{usr, " left the channel ", roomname, "."}, "")})
 				break
 			}
 
