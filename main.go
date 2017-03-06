@@ -11,9 +11,6 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-var rooms = make(map[string]*Chatroom)
-var DEFAULT_ROOM = "general"
-
 func validUser(user string) bool {
 	return len(user) < 80 && !strings.HasPrefix(user, "#")
 }

@@ -19,6 +19,9 @@ type Message struct {
 	Message string
 }
 
+var rooms = make(map[string]*Chatroom)
+var DEFAULT_ROOM = "general"
+
 func (self *Chatroom) Send(msg Message) {
 	for client, ws := range self.Clients {
 		err := ws.WriteJSON(msg)
@@ -29,6 +32,13 @@ func (self *Chatroom) Send(msg Message) {
 			delete(self.Clients, client)
 			self.SendChannelMsg("User " + client + " left channel.")
 		}
+	}
+	destroyIfEmpty(self)
+}
+
+func destroyIfEmpty(room *Chatroom) {
+	if len(room.Clients) == 0 {
+		delete(rooms, room.Name)
 	}
 }
 
@@ -42,6 +52,8 @@ func (self *Chatroom) Leave(user string) error {
 	delete(self.Clients, user)
 
 	self.SendChannelMsg("User " + user + " left channel.")
+
+	destroyIfEmpty(self)
 
 	return nil
 }
@@ -69,6 +81,18 @@ func (self *Chatroom) Users() []string {
 	}
 
 	return users
+}
+
+func RoomNames() []string {
+	rs := make([]string, len(rooms))
+
+	i := 0
+	for r := range rooms {
+		rs[i] = r
+		i++
+	}
+
+	return rs
 }
 
 func joinOrCreateRoom(name string, user string, ws *websocket.Conn) *Chatroom {

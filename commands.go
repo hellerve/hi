@@ -14,6 +14,10 @@ func listUsers(room *Chatroom, ws *websocket.Conn, user string, args []string) {
 	ws.WriteJSON(room.ChannelMsg(strings.Join(room.Users(), ", ")))
 }
 
+func listChannels(room *Chatroom, ws *websocket.Conn, user string, args []string) {
+	ws.WriteJSON(room.ChannelMsg(strings.Join(RoomNames(), ", ")))
+}
+
 func join(room *Chatroom, ws *websocket.Conn, user string, args []string) {
 	if len(args) != 2 {
 		ws.WriteJSON(room.ChannelMsg(WrongArgs(args)))
@@ -49,8 +53,9 @@ func WrongArgs(args []string) string {
 func init() {
 	// this avoids an initialization loop with joining
 	COMMANDS = map[string]Command{
-		"/list":  listUsers,
-		"/join":  join,
-		"/leave": leave,
+		"/list":     listUsers,
+		"/channels": listChannels,
+		"/join":     join,
+		"/leave":    leave,
 	}
 }
