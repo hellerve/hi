@@ -1,9 +1,8 @@
-function maybejoin(e) {
-  if (e.value.endsWith("\n")) {
-    e.value = e.value.replace("\n", "");
+document.getElementById("usr").onkeyup = function(e) {
+  if (e.keyCode == 13) {
+    join();
   }
-  join();
-}
+};
 function join() {
   var username = document.getElementById("usr").value;
   var ws = new WebSocket("ws://" + window.location.host + "/ws?username=" + username);
@@ -28,7 +27,7 @@ function join() {
     v.setAttribute("class", "message");
     v.appendChild(document.createTextNode(msg["Message"]));
     node.appendChild(v);
-    msgs.append(node);
+    msgs.appendChild(node);
   });
 
   document.getElementById("send").onkeyup = function(e) {

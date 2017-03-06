@@ -75,6 +75,15 @@ body {
   margin-right: 1em;
 }
 
+#messages p {
+  margin: 0;
+  padding: 0.5em;
+}
+
+#messages p:hover {
+  background-color: #eee;
+}
+
 #bottom {
   width: 90%;
   margin: auto;
