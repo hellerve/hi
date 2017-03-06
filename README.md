@@ -41,6 +41,18 @@ The resulting Go program can be run without arguments (runs on port 8080) or wit
 the port set (using the `-p` option). It assumes that the public directory is in
 the directory where the program is started.
 
+## Commands
+
+There are a few special commands that you can issue to interact with the server,
+IRC-style.
+
+```
+/join <channelname>  # join a channel
+/leave <channelname> # leave a channel (will send back an error if user is not subscribed to the channel)
+/list                # list all users in the current channel
+/channels            # list all channels
+```
+
 
 <hr/>
 
