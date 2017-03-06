@@ -65,6 +65,9 @@ body {
   padding-left: 1em;
   height: calc(100% - 100px);
   border-bottom: 2px solid black;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  word-break: break-all;
 }
 
 #messages .user {
