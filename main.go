@@ -11,32 +11,8 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-type Chatroom struct {
-	Name    string
-	Clients map[string]*websocket.Conn
-}
-
-type Message struct {
-	From    string
-	Message string
-}
-
-var rooms = make(map[string]Chatroom)
+var rooms = make(map[string]*Chatroom)
 var DEFAULT_ROOM = "general"
-
-func (self *Chatroom) Send(msg Message) {
-	for client, ws := range self.Clients {
-		err := ws.WriteJSON(msg)
-
-		if err != nil {
-			log.Printf("error: %v", err)
-			ws.Close()
-			delete(self.Clients, client)
-			self.Send(Message{From: "#channel",
-				Message: strings.Join([]string{client, " left the channel ", self.Name, "."}, "")})
-		}
-	}
-}
 
 func validUser(user string) bool {
 	return len(user) < 80 && !strings.HasPrefix(user, "#")
@@ -62,13 +38,6 @@ func makeWsHandler() func(http.ResponseWriter, *http.Request) {
 			return
 		}
 
-		room, ok := rooms[roomname]
-
-		if !ok {
-			rooms[roomname] = Chatroom{Clients: make(map[string]*websocket.Conn), Name: roomname}
-			room = rooms[roomname]
-		}
-
 		ws, err := upgrader.Upgrade(w, r, nil)
 
 		if err != nil {
@@ -77,27 +46,10 @@ func makeWsHandler() func(http.ResponseWriter, *http.Request) {
 			return
 		}
 
-		defer ws.Close()
+		room := joinOrCreateRoom(roomname, usr, ws)
 
-		room.Clients[usr] = ws
-
-		room.Send(Message{From: "#channel",
-			Message: strings.Join([]string{"Welcome to ", roomname, ", ", usr, "!"}, "")})
-
-		for {
-			var msg Message
-
-			err := ws.ReadJSON(&msg)
-
-			if err != nil {
-				log.Printf("error %v", err)
-				delete(room.Clients, usr)
-				room.Send(Message{From: "#channel",
-					Message: strings.Join([]string{usr, " left the channel ", roomname, "."}, "")})
-				break
-			}
-
-			room.Send(msg)
+		if room != nil {
+			go handleMessages(room, usr, ws)
 		}
 	}
 }
@@ -112,8 +64,7 @@ func main() {
 
 	http.HandleFunc("/ws", makeWsHandler())
 
-	err := http.ListenAndServe(strings.Join([]string{":", strconv.Itoa(port)}, ""),
-		nil)
+	err := http.ListenAndServe(":"+strconv.Itoa(port), nil)
 
 	if err != nil {
 		log.Fatal("Server died with message:", err)
