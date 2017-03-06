@@ -22,11 +22,7 @@ func join(room *Chatroom, ws *websocket.Conn, user string, args []string) {
 
 	roomname := args[1]
 
-	newroom := joinOrCreateRoom(roomname, user, ws)
-
-	if newroom != nil {
-		go handleMessages(newroom, user, ws)
-	}
+	joinOrCreateRoom(roomname, user, ws)
 }
 
 func leave(room *Chatroom, ws *websocket.Conn, user string, args []string) {
@@ -40,10 +36,10 @@ func leave(room *Chatroom, ws *websocket.Conn, user string, args []string) {
 	err := leaveRoom(roomname, user)
 
 	if err != nil {
-		ws.WriteJSON(room.ChannelMsg("Couldn't leave channel " + roomname + ": " + err.Error()))
+		ws.WriteJSON(SystemMsg("Couldn't leave channel " + roomname + ": " + err.Error()))
 	}
 
-	ws.WriteJSON(room.ChannelMsg("Left channel " + roomname + "."))
+	ws.WriteJSON(SystemMsg("Left channel " + roomname + "."))
 }
 
 func WrongArgs(args []string) string {

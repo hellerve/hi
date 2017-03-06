@@ -27,9 +27,23 @@ func (self *Chatroom) Send(msg Message) {
 			log.Printf("error: %v", err)
 			ws.Close()
 			delete(self.Clients, client)
-			self.SendChannelMsg(client + " left channel.")
+			self.SendChannelMsg("User " + client + " left channel.")
 		}
 	}
+}
+
+func (self *Chatroom) Leave(user string) error {
+	_, ok := self.Clients[user]
+
+	if !ok {
+		return errors.New("User " + user + " not present in room " + self.Name + ".")
+	}
+
+	delete(self.Clients, user)
+
+	self.SendChannelMsg("User " + user + " left channel.")
+
+	return nil
 }
 
 func (self *Chatroom) SendChannelMsg(msg string) {
@@ -38,6 +52,10 @@ func (self *Chatroom) SendChannelMsg(msg string) {
 
 func (self *Chatroom) ChannelMsg(msg string) Message {
 	return Message{From: "#" + self.Name, Message: msg, Room: self.Name}
+}
+
+func SystemMsg(msg string) Message {
+	return Message{From: "hi", Message: msg}
 }
 
 func (self *Chatroom) Users() []string {
@@ -64,11 +82,13 @@ func joinOrCreateRoom(name string, user string, ws *websocket.Conn) *Chatroom {
 	_, already_there := room.Clients[user]
 
 	if already_there {
-		ws.WriteJSON(room.ChannelMsg("User " + user + " is already in room."))
+		ws.WriteJSON(SystemMsg("User " + user + " is already in room."))
 		return nil
 	}
 
 	room.Clients[user] = ws
+
+	room.SendChannelMsg("Welcome to " + room.Name + ", " + user + "!")
 
 	return room
 }
@@ -79,24 +99,11 @@ func leaveRoom(name string, user string) error {
 	if !ok {
 		return errors.New("Room " + name + " does not exist.")
 	}
-
-	_, ok = room.Clients[user]
-
-	if !ok {
-		return errors.New("User " + user + " not present in room " + name + ".")
-	}
-
-	delete(room.Clients, user)
-
-	room.SendChannelMsg("User " + user + " left channel.")
-
-	return nil
+	return room.Leave(user)
 }
 
-func handleMessages(room *Chatroom, usr string, ws *websocket.Conn) {
+func handleMessages(usr string, ws *websocket.Conn) {
 	defer ws.Close()
-
-	room.SendChannelMsg("Welcome to " + room.Name + ", " + usr + "!")
 
 	for {
 		var msg Message
@@ -105,9 +112,17 @@ func handleMessages(room *Chatroom, usr string, ws *websocket.Conn) {
 
 		if err != nil {
 			log.Printf("error %v", err)
-			delete(room.Clients, usr)
-			room.SendChannelMsg(usr + " left channel.")
+			for _, room := range rooms {
+				room.Leave(usr)
+			}
 			break
+		}
+
+		room, ok := rooms[msg.Room]
+
+		if !ok {
+			ws.WriteJSON(SystemMsg("room does not exist."))
+			continue
 		}
 
 		cmd := strings.Split(msg.Message, " ")

@@ -63,7 +63,7 @@ body {
 #messages {
   padding: 5px;
   padding-left: 1em;
-  height: calc(100% - 100px);
+  height: calc(100% - 130px);
   border-bottom: 2px solid black;
   overflow-y: scroll;
   overflow-x: hidden;
@@ -88,4 +88,8 @@ body {
   width: 90%;
   margin: auto;
   padding: 1em;
+}
+
+#room {
+  max-width: 10em;
 }

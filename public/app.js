@@ -5,7 +5,8 @@ document.getElementById("usr").onkeyup = function(e) {
 };
 function join() {
   var username = document.getElementById("usr").value;
-  var ws = new WebSocket("ws://" + window.location.host + "/ws?username=" + username);
+  var proto = location.protocol == "http:" ? "ws" : "wss";
+  var ws = new WebSocket(proto + "://" + window.location.host + "/ws?username=" + username);
 
   var joinr = document.getElementById("join");
   joinr.style.display = "none";
@@ -30,12 +31,15 @@ function join() {
     msgs.appendChild(node);
   });
 
+  var roomInsert = document.getElementById("room");
+
   document.getElementById("send").onkeyup = function(e) {
     if (e.keyCode == 13) {
       ws.send(
         JSON.stringify({
             From: username,
-            Message: e.target.value
+            Message: e.target.value,
+            Room: roomInsert.value
         })
       );
       e.target.value = "";

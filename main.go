@@ -49,7 +49,7 @@ func makeWsHandler() func(http.ResponseWriter, *http.Request) {
 		room := joinOrCreateRoom(roomname, usr, ws)
 
 		if room != nil {
-			go handleMessages(room, usr, ws)
+			go handleMessages(usr, ws)
 		}
 	}
 }
