@@ -6,7 +6,7 @@ document.getElementById("usr").onkeyup = function(e) {
 function join() {
   var username = document.getElementById("usr").value;
   var proto = location.protocol == "http:" ? "ws" : "wss";
-  var ws = new WebSocket(proto + "://" + window.location.host + "/ws?username=" + username);
+  var ws = new WebSocket(proto + "://" + window.location.host + window.location.pathname + "/ws?username=" + username);
 
   var joinr = document.getElementById("join");
   joinr.style.display = "none";
