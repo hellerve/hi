@@ -6,7 +6,8 @@ document.getElementById("usr").onkeyup = function(e) {
 function join() {
   var username = document.getElementById("usr").value;
   var proto = location.protocol == "http:" ? "ws" : "wss";
-  var ws = new WebSocket(proto + "://" + window.location.host + window.location.pathname + "/ws?username=" + username);
+  var ws = new WebSocket(proto + "://" + window.location.host +
+                         window.location.pathname + "/ws?username=" + username);
 
   var joinr = document.getElementById("join");
   joinr.style.display = "none";
@@ -21,7 +22,7 @@ function join() {
 
     var node = document.createElement("p");
     var k = document.createElement("span");
-    k.setAttribute("class", "user");
+    k.setAttribute("class", msg["Meta"] ? "channel" : "user");
     k.appendChild(document.createTextNode(msg["From"]));
     node.appendChild(k);
     var v = document.createElement("span");
@@ -39,7 +40,8 @@ function join() {
         JSON.stringify({
             From: username,
             Message: e.target.value,
-            Room: roomInsert.value
+            Room: roomInsert.value,
+            Meta: false,
         })
       );
       e.target.value = "";

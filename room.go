@@ -17,6 +17,7 @@ type Message struct {
 	From    string
 	Room    string
 	Message string
+  Meta    bool
 }
 
 var rooms = make(map[string]*Chatroom)
@@ -63,11 +64,11 @@ func (self *Chatroom) SendChannelMsg(msg string) {
 }
 
 func (self *Chatroom) ChannelMsg(msg string) Message {
-	return Message{From: "#" + self.Name, Message: msg, Room: self.Name}
+	return Message{From: "#" + self.Name, Message: msg, Room: self.Name, Meta: true}
 }
 
 func SystemMsg(msg string) Message {
-	return Message{From: "hi", Message: msg}
+	return Message{From: "hi", Message: msg, Meta: true}
 }
 
 func (self *Chatroom) Users() []string {
@@ -141,6 +142,8 @@ func handleMessages(usr string, ws *websocket.Conn) {
 			}
 			break
 		}
+
+    msg.Meta = false;
 
 		room, ok := rooms[msg.Room]
 
